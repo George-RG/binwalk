@@ -82,7 +82,7 @@ else
   INVENV=0
 fi
 
-if [ $INVENV -ne 0 ]
+if [ $INVENV -ne 1 ]
 then
     echo "Not in a virtual environment. Creating one..."
     $PYTHON -m venv .env
