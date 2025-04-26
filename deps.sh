@@ -75,7 +75,12 @@ else
 fi
 
 # Check if in virtual env
-[[ "$VIRTUAL_ENV" == "" ]]; INVENV=$?
+if [[ "$VIRTUAL_ENV" != "" ]]
+then
+  INVENV=1
+else
+  INVENV=0
+fi
 
 if [ $INVENV -ne 0 ]
 then
