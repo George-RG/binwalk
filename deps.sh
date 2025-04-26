@@ -74,11 +74,23 @@ else
     REQUIRED_UTILS="sudo $REQUIRED_UTILS"
 fi
 
+# Check if in virtual env
+[[ "$VIRTUAL_ENV" == "" ]]; INVENV=$?
+
+if [ $INVENV -ne 0 ]
+then
+    echo "Not in a virtual environment. Creating one..."
+    $PYTHON -m venv .env
+    source .env/bin/activate
+    PYTHON="$(which python3)"
+    echo "Virtual environment created and activated."
+fi
+
 function install_yaffshiv
 {
     git clone --quiet --depth 1 --branch "master" https://github.com/devttys0/yaffshiv
-    (cd yaffshiv && $SUDO $PYTHON setup.py install)
-    $SUDO rm -rf yaffshiv
+    (cd yaffshiv && $PYTHON setup.py install)
+    rm -rf yaffshiv
 }
 
 function install_sasquatch
@@ -88,17 +100,16 @@ function install_sasquatch
     $SUDO rm -rf sasquatch
 }
 
-function install_jefferson
-{
-    git clone --quiet --depth 1 --branch "master" https://github.com/sviehb/jefferson
-    (cd jefferson && $SUDO $PYTHON -mpip install -r requirements.txt && $SUDO $PYTHON setup.py install)
-    $SUDO rm -rf jefferson
-}
+# function install_jefferson
+# {
+#     git clone --quiet --depth 1 --branch "master" https://github.com/sviehb/jefferson
+#     (cd jefferson && $SUDO $PYTHON -mpip install -r requirements.txt && $SUDO $PYTHON setup.py install)
+#     $SUDO rm -rf jefferson
+# }
 
 function install_cramfstools
 {
   # Downloads cramfs tools from sourceforge and installs them to $INSTALL_LOCATION
-  TIME=`date +%s`
   INSTALL_LOCATION=/usr/local/bin
 
   # https://github.com/torvalds/linux/blob/master/fs/cramfs/README#L106
@@ -113,17 +124,17 @@ function install_cramfstools
 }
 
 
-function install_ubireader
-{
-    git clone --quiet --depth 1 --branch "main" https://github.com/jrspruitt/ubi_reader
-    (cd ubi_reader && $SUDO $PYTHON setup.py install)
-    $SUDO rm -rf ubi_reader
-}
+# function install_ubireader
+# {
+#     git clone --quiet --depth 1 --branch "main" https://github.com/jrspruitt/ubi_reader
+#     (cd ubi_reader && $SUDO $PYTHON setup.py install)
+#     $SUDO rm -rf ubi_reader
+# }
 
 function install_pip_package
 {
     PACKAGE="$1"
-    $SUDO $PYTHON -mpip install $PACKAGE
+    $PYTHON -mpip install $PACKAGE
 }
 
 function find_path
@@ -236,13 +247,15 @@ if [ $? -ne 0 ]
     echo "Package installation failed: $PKG_CANDIDATES"
     exit 1
 fi
-install_pip_package "setuptools matplotlib capstone pycryptodome gnupg tk"
+install_pip_package "setuptools matplotlib capstone pycryptodome gnupg tk ubi_reader jefferson"
 install_sasquatch
 install_yaffshiv
-install_jefferson
-install_ubireader
+# install_jefferson
+# install_ubireader
 
 if [ $distro_version = "18" ]
 then
 install_cramfstools
 fi
+
+deactivate
